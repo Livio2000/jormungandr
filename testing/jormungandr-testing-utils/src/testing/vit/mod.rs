@@ -7,76 +7,15 @@ use chain_impl_mockchain::{
     value::Value,
     vote::{Options, PayloadType},
 };
-
-pub fn proposal_with_3_options(rewards_increase: u64) -> Proposal {
-    let action = VoteAction::Parameters {
-        action: ParametersGovernanceAction::RewardAdd {
-            value: Value(rewards_increase),
-        },
-    };
-
-    Proposal::new(
-        VoteTestGen::external_proposal_id(),
-        Options::new_length(3).unwrap(),
-        action,
-    )
-}
-
-pub fn offchain_proposal() -> Proposal {
-    Proposal::new(
-        VoteTestGen::external_proposal_id(),
-        Options::new_length(3).unwrap(),
-        VoteAction::OffChain,
-    )
-}
-
-pub fn proposals(rewards_increase: u64) -> Proposals {
-    let mut proposals = Proposals::new();
-    for _ in 0..3 {
-        assert_eq!(
-            PushProposal::Success,
-            proposals.push(proposal_with_3_options(rewards_increase)),
-            "generate_proposal method is only for correct data preparation"
-        );
-    }
-    proposals
-}
+mod builder;
+pub use builder::VotePlanBuilder;
 
 pub trait VotePlanExtension {
-    fn new_with_3_off_chain_proposals() -> VotePlan;
-    fn new_with_3_proposals(rewards_increase: u64) -> VotePlan;
     fn as_json(&self) -> json::JsonValue;
     fn as_json_str(&self) -> String;
 }
 
 impl VotePlanExtension for VotePlan {
-    fn new_with_3_off_chain_proposals() -> VotePlan {
-        let mut proposals = Proposals::new();
-        for _ in 0..3 {
-            let _ = proposals.push(offchain_proposal());
-        }
-
-        VotePlan::new(
-            BlockDate::from_epoch_slot_id(1, 0),
-            BlockDate::from_epoch_slot_id(2, 0),
-            BlockDate::from_epoch_slot_id(3, 0),
-            proposals,
-            PayloadType::Public,
-            vec![],
-        )
-    }
-
-    fn new_with_3_proposals(rewards_increase: u64) -> VotePlan {
-        VotePlan::new(
-            BlockDate::from_epoch_slot_id(0, 0),
-            BlockDate::from_epoch_slot_id(1, 0),
-            BlockDate::from_epoch_slot_id(2, 0),
-            proposals(rewards_increase),
-            PayloadType::Public,
-            vec![],
-        )
-    }
-
     fn as_json(&self) -> json::JsonValue {
         let mut data = json::JsonValue::new_object();
 
