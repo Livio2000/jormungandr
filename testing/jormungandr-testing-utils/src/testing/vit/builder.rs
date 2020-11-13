@@ -16,6 +16,12 @@ pub struct VotePlanBuilder {
     vote_tally_end_date: BlockDate,
 }
 
+impl Default for VotePlanBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl VotePlanBuilder {
     pub fn new() -> Self {
         Self {
